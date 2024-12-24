@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhamraCompare</title>
+    <style>
+        /* Style général */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1,h5 {
+            text-align: center;
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: white;
+            padding: 20px 0;
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        /* Conteneur principal */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Barre de recherche */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar select {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar button {
+            padding: 15px 20px;
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar button:hover {
+            background: linear-gradient(45deg, #388E3C, #43A047);
+            transform: translateY(-2px);
+        }
+
+        /* Résultats */
+        #results {
+            margin-top: 20px;
+        }
+
+        .product {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .product h3 {
+            margin: 0;
+            color: #388E3C;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .product p {
+            margin: 5px 0 15px;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .product a {
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .product a:hover {
+            background: linear-gradient(45deg, #388E3C, #43A047);
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input[type="text"],
+            .search-bar select,
+            .search-bar button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h5>PharmaCompare</h5>
+    <h1>Comparateur de Prix des Produits Parapharmaceutiques</h1>
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Rechercher un produit...">
+            <select id="sortOrder">
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+                <option value="rating_asc">Note croissante</option>
+                <option value="rating_desc">Note décroissante</option>
+            </select>
+            <button onclick="searchProducts()">Rechercher</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script src="a.python"></script>
+
+    <script>
+        function getStarRating(rating) {
+            const fullStar = '★';
+            const emptyStar = '☆';
+            let stars = '';
+
+            for (let i = 1; i <= 5; i++) {
+                stars += i <= rating ? fullStar : emptyStar;
+            }
+
+            return stars;
+        }
+
+        async function searchProducts() {
+            const query = document.getElementById('search').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+
+            try {
+                const [sort_by, order] = sortOrder.split('_');
+                const response = await fetch(`http://127.0.0.1:8000/products/search/${query}?order=${order}&sort_by=${sort_by}`);
+
+                if (!response.ok) {
+                    throw new Error(`Erreur API : ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = ''; // Efface les anciens résultats
+
+                if (data.products && data.products.length > 0) {
+                    data.products.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product';
+                        productDiv.innerHTML = `
+                            <h3>${product.name}</h3>
+                            <p>Prix : ${product.price}DT</p>
+                            <p>Note : <span style="color: #FFC107;">${getStarRating(product.rating)}</span></p>
+                            <p>Pharmacie : ${product.pharmacy_name}</p>
+                            <a href="${product.url}" target="_blank">Voir le produit</a>
+                        `;
+                        resultsDiv.appendChild(productDiv);
+                    });
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: red; text-align: center;">Aucun produit trouvé.</p>`;
+                }
+            } catch (error) {
+                console.error("Erreur lors de la recherche des produits : ", error);
+                alert("Une erreur s'est produite lors de la recherche des produits.");
+            }
+        }
+    </script>
+</body>
+</html>

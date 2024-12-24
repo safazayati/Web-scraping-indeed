@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offres d'emploi - Software Engineer</title>
+    <style>
+        /* Style global */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        /* Conteneur principal */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Cartes des offres */
+        .job-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background-color: #f9f9f9;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .job-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-card h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #007BFF;
+        }
+
+        .job-card p {
+            margin: 0.5rem 0;
+        }
+
+        .job-card a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .job-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Bouton de chargement */
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Offres d'emploi - Software Engineer</h1>
+        <p>Explorez les dernières opportunités dans le domaine du développement logiciel</p>
+    </header>
+
+    <div class="container" id="jobs">
+        <p class="loading" id="loading">Chargement des offres...</p>
+    </div>
+
+    <script>
+        async function fetchJobs() {
+            const jobsContainer = document.getElementById('jobs');
+            const loadingElement = document.getElementById('loading');
+    
+            try {
+                const response = await fetch('http://localhost:3000/jobs');
+                const jobs = await response.json();
+    
+                loadingElement.style.display = 'none';
+    
+                if (jobs.length === 0) {
+                    jobsContainer.innerHTML = '<p>Aucune offre disponible pour le moment.</p>';
+                    return;
+                }
+    
+                jobs.forEach(job => {
+                    const jobCard = document.createElement('div');
+                    jobCard.className = 'job-card';
+    
+                    jobCard.innerHTML = `
+                        <h2>${job.title || 'Titre non disponible'}</h2>
+                        <p><strong>Entreprise :</strong> ${job.company || 'Non spécifiée'}</p>
+                        <p><strong>Localisation :</strong> ${job.location || 'Non spécifiée'}</p>
+                        <p>${job.description || 'Description non disponible'}</p>
+                        <a href="${job.link || '#'}" target="_blank">Voir l'offre</a>
+                    `;
+                    jobsContainer.appendChild(jobCard);
+                });
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
+                jobsContainer.innerHTML = '<p>Erreur de chargement des offres.</p>';
+            }
+        }
+    
+        fetchJobs();
+    </script>
+    
+
+</body>
+</html>
